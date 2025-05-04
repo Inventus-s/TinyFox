@@ -80,7 +80,7 @@ function Login() {
                 <CardHeader>
                     <CardTitle>Login</CardTitle>
                     <CardDescription>to your account if you already have one</CardDescription>
-                    {error && <Error message={error?.message} />}
+                    {error && <Error message={error?.message!} />}
                 </CardHeader>
                 <CardContent className="space-y-2">
                     <div className="space-y-1">

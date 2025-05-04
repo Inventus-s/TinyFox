@@ -3,7 +3,7 @@ import { useState } from "react";
 const useFetch = (cb: any, options = {}) => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<{ message?: string }>({});
 
     interface FetchOptions {
         [key: string]: any;
@@ -15,11 +15,11 @@ const useFetch = (cb: any, options = {}) => {
 
     const fn = async (...args: any[]): Promise<void> => {
         setLoading(true);
-        setError(null);
+        setError({});
         try {
             const response = await (cb as FetchCallback)(options, ...args);
             setData(response);
-            setError(null);
+            setError({});
         } catch (error: any) {
             setError(error);
         } finally {
