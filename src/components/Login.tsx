@@ -11,9 +11,18 @@ import { Button } from "./ui/button"
 import { BeatLoader } from "react-spinners";
 import Error from "./Error";
 import { useState } from "react";
+import * as Yup from 'yup'
+import useFetch from "@/hooks/useFetch";
+import { login } from "@/db/apiAuth";
+
+interface Errors {
+    email?: string;
+    password?: string;
+}
 
 
 function Login() {
+    const [errors, setErrors] = useState<Errors>({});
     const [formData, setFormData] = useState({
         email: "",
         password: "",
@@ -25,6 +34,32 @@ function Login() {
             ...prev,
             [name]: value
         }))
+    };
+
+    const {data, error, loading} = useFetch(login, formData)
+
+    const handleLogin = async () => {
+        setErrors({});
+        try {
+            const schema = Yup.object().shape({
+                email: Yup.string()
+                    .email("Invalid Email").required("Email is required"),
+                password: Yup.string()
+                    .min(6, "Password must be at least 6 characters").required("Password is required"),
+            });
+            await schema.validate(formData, { abortEarly: false });
+            // api call
+        } catch (error: unknown) {
+            const newErrors: Record<string, string> = {};
+            if (error instanceof Yup.ValidationError) {
+                error.inner.forEach((err) => {
+                    if (err.path) {
+                        newErrors[err.path] = err.message;
+                    }
+                });
+            }
+            setErrors(newErrors);
+        }
     }
 
     return (
@@ -33,19 +68,20 @@ function Login() {
                 <CardHeader>
                     <CardTitle>Login</CardTitle>
                     <CardDescription>to your account if you already have one</CardDescription>
-                    <Error message="Some Error" />
+                    {/* <Error message="Some Error" /> */}
                 </CardHeader>
                 <CardContent className="space-y-2">
                     <div className="space-y-1">
-                        <Input type="email" name="email" placeholder="Enter Email" />
-                        <Error message="Some Error" />
+                        <Input type="email" name="email" placeholder="Enter Email" onChange={handleInputChange} />
+                        {errors.email && <Error message={errors.email} />}
                     </div>
                     <div className="space-y-1">
-                        <Input type="password" name="password" placeholder="Enter Password" />
+                        <Input type="password" name="password" placeholder="Enter Password" onChange={handleInputChange} />
+                        {errors.password && <Error message={errors.password} />}
                     </div>
                 </CardContent>
                 <CardFooter>
-                    <Button>
+                    <Button onClick={handleLogin}>
                         {true ? <BeatLoader size={10} color="#36d7b7" /> : "Login"}
                     </Button>
                 </CardFooter>
