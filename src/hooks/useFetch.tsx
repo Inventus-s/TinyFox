@@ -1,18 +1,26 @@
 import { useState } from "react";
 
-const useFetch = (cb, options = {}) => {
+const useFetch = (cb: any, options = {}) => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const fn = async (...args) => {
+    interface FetchOptions {
+        [key: string]: any;
+    }
+
+    interface FetchCallback {
+        (options: FetchOptions, ...args: any[]): Promise<any>;
+    }
+
+    const fn = async (...args: any[]): Promise<void> => {
         setLoading(true);
         setError(null);
         try {
-            const response = await cb(options, ...args);
+            const response = await (cb as FetchCallback)(options, ...args);
             setData(response);
             setError(null);
-        } catch (error) {
+        } catch (error: any) {
             setError(error);
         } finally {
             setLoading(false);
